@@ -12,7 +12,7 @@ Código generado y revisado con asistencia de IA generativa (Claude - Anthropic)
 import sys
 import os
 
-# Permite importar módulos desde el directorio raíz del proyecto
+# Para Permitir importar módulos desde el directorio raíz del proyecto
 sys.path.insert(0, os.path.dirname(__file__))
 
 from ui.cli_interface import InterfazCLI
