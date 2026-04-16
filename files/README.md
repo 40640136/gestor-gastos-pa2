@@ -42,3 +42,5 @@ python main.py
 ## Categorías disponibles
 
 `alimentacion` | `transporte` | `salud` | `entretenimiento` | `educacion` | `hogar` | `otros`
+
+#cambio exclusivo para la rama develop
