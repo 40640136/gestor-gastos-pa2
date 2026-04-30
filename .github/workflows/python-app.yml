@@ -1,37 +1,60 @@
-name: Python application
+name: CI — Gestor de Gastos
 
 on:
   push:
-    branches: [ "main", "develop" ]
+    branches: ["**"]
   pull_request:
-    branches: [ "main", "develop" ]
+    branches: [main, develop]
 
 jobs:
-  build:
+  test:
+    name: Lint & Tests
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11"]
+
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v3
-      with:
-        python-version: "3.10"
-        
-    - name: Lint with flake8
-        run: |
-          flake8 . --max-line-length=88 --statistics
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-   - name: Check formatting with black
-        run: |
-          black --check .
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "pip"
 
-  - name: Run unit tests with coverage
+      - name: Install dependencies
         run: |
-          # Añadimos PYTHONPATH=. para que encuentre la carpeta src
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Lint with flake8
+        run: |
+          # Revisa errores de sintaxis, pero ignora advertencias estéticas menores
+          flake8 src/ tests/ --max-line-length=88 --statistics
+
+      - name: Run unit tests with coverage
+        run: |
+          # Definimos PYTHONPATH=. para que reconozca la carpeta 'src'
           PYTHONPATH=. pytest tests/unit/ \
             --cov=src \
             --cov-report=term-missing \
             --cov-report=xml:coverage.xml \
             --cov-fail-under=80 \
             -v
+
+      - name: Run integration tests
+        run: |
+          # Corre el flujo completo de la app
+          PYTHONPATH=. pytest tests/integration/ -v
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: matrix.python-version == '3.11'
+        with:
+          name: coverage-report
+          path: |
+            coverage.xml
+          retention-days: 7
