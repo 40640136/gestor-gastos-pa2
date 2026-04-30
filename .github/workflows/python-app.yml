@@ -11,18 +11,14 @@ jobs:
     name: Lint & Tests
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        python-version: ["3.11"] # Usamos solo la 3.11 para que sea más rápido
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.11"
           cache: "pip"
 
       - name: Install dependencies
@@ -32,15 +28,13 @@ jobs:
 
       - name: Lint with flake8
         run: |
-          # Solo revisamos errores críticos, ignorando estilo para que pase en verde
-          flake8 src/ tests/ --count --select=E9,F63,F7,F82 --show-source --statistics
+          # Cambiamos la forma de llamar a flake8 para que no de error de modulo
+          python -m flake8 src/ tests/ --count --select=E9,F63,F7,F82 --show-source --statistics
 
       - name: Run unit tests with coverage
-        env:
-          PYTHONPATH: ${{ github.workspace }}
         run: |
-          # Ejecutamos los tests apuntando a la raíz del proyecto
-          pytest tests/unit/ \
+          # Forzamos el PYTHONPATH directamente en el comando
+          PYTHONPATH=.:src pytest tests/unit/ \
             --cov=src \
             --cov-report=term-missing \
             --cov-report=xml:coverage.xml \
@@ -48,7 +42,5 @@ jobs:
             -v
 
       - name: Run integration tests
-        env:
-          PYTHONPATH: ${{ github.workspace }}
         run: |
-          pytest tests/integration/ -v
+          PYTHONPATH=.:src pytest tests/integration/ -v
