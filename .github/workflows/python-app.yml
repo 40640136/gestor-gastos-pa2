@@ -22,14 +22,15 @@ jobs:
         run: |
           flake8 . --max-line-length=88 --statistics
 
-    - name: Check formatting with black
+   - name: Check formatting with black
         run: |
           black --check .
 
-    - name: Run unit tests with coverage
+  - name: Run unit tests with coverage
         run: |
-          pytest . \
-            --cov=. \
+          # Añadimos PYTHONPATH=. para que encuentre la carpeta src
+          PYTHONPATH=. pytest tests/unit/ \
+            --cov=src \
             --cov-report=term-missing \
             --cov-report=xml:coverage.xml \
             --cov-fail-under=80 \
